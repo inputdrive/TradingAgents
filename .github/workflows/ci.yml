@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+  security-events: write
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -57,5 +61,32 @@ jobs:
         run: pip install "ruff>=0.15"
       - name: Lint the repository
         # The repo is fully clean under the strict select, so we lint everything
-        # (results/ and worklog/ are excluded via pyproject extend-exclude).
+        # while skipping generated output folders via pyproject extend-exclude.
         run: ruff check .
+
+  snyk-code:
+    name: snyk code
+    runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets['SNYK_TOKEN'] }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip when SNYK_TOKEN is unavailable
+        if: env.SNYK_TOKEN == ''
+        run: echo "SNYK_TOKEN is not configured; skipping Snyk Code."
+      - name: Install Snyk CLI
+        if: env.SNYK_TOKEN != ''
+        uses: snyk/actions/setup@master
+      - name: Run Snyk Code
+        if: env.SNYK_TOKEN != ''
+        id: snyk-code
+        continue-on-error: true
+        run: snyk code test . --severity-threshold=high --sarif-file-output=snyk-code.sarif
+      - name: Upload Snyk results to GitHub Code Scanning
+        if: env.SNYK_TOKEN != '' && hashFiles('snyk-code.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-code.sarif
+      - name: Fail on Snyk Code findings
+        if: env.SNYK_TOKEN != '' && steps.snyk-code.outcome == 'failure'
+        run: exit 1

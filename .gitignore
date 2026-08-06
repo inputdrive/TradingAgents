@@ -221,3 +221,10 @@ __marimo__/
 # Enterprise env file (secrets) and generated run reports
 .env.enterprise
 reports/
+results/
+eval_results/
+worklog/
+
+# Local security scan artifacts
+snyk-code.sarif
+snyk-code.json

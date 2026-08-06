@@ -23,12 +23,14 @@ import json
 import logging
 import re
 import time
-import xml.etree.ElementTree as ET
 from collections.abc import Iterable
 from datetime import datetime
 from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+
+from defusedxml import ElementTree as ET
+from defusedxml.common import DefusedXmlException
 
 from .symbol_utils import crypto_base
 
@@ -120,7 +122,7 @@ def _fetch_subreddit_rss(
             return _fetch_subreddit_rss(ticker, sub, limit, timeout, _retry=False)
         logger.warning("Reddit RSS fetch failed for r/%s · %s: %s", sub, ticker, exc)
         return []
-    except (OSError, http.client.HTTPException, ET.ParseError) as exc:
+    except (OSError, http.client.HTTPException, ET.ParseError, DefusedXmlException) as exc:
         # OSError covers URLError/TimeoutError/connection resets; HTTPException
         # covers chunked-transfer errors (IncompleteRead/BadStatusLine, #1024).
         logger.warning("Reddit RSS fetch failed for r/%s · %s: %s", sub, ticker, exc)

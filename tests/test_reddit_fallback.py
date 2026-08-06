@@ -26,6 +26,19 @@ _SAMPLE_ATOM = """<?xml version="1.0" encoding="UTF-8"?>
 </feed>
 """
 
+_SAMPLE_ATOM_WITH_ENTITY = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE feed [
+  <!ENTITY xxe "EXPANDED_ENTITY">
+]>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <title>&xxe;</title>
+    <published>2026-05-20T14:30:00+00:00</published>
+    <content type="html">&lt;p&gt;test&lt;/p&gt;</content>
+  </entry>
+</feed>
+"""
+
 
 def _resp(read_fn):
     """A minimal context-manager response whose read() runs ``read_fn``."""
@@ -87,6 +100,14 @@ class TestRssParsing:
 
     def test_malformed_xml_fails_open(self):
         with patch.object(reddit, "urlopen", return_value=_resp(lambda: b"<<not xml>>")):
+            assert reddit._fetch_subreddit_rss("NVDA", "stocks", 5, 5.0) == []
+
+    def test_entity_expansion_xml_is_rejected(self):
+        with patch.object(
+            reddit,
+            "urlopen",
+            return_value=_resp(lambda: _SAMPLE_ATOM_WITH_ENTITY.encode("utf-8")),
+        ):
             assert reddit._fetch_subreddit_rss("NVDA", "stocks", 5, 5.0) == []
 
 

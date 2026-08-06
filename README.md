@@ -287,6 +287,16 @@ Backtest results are not guaranteed to match any published figure. Returns depen
 
 Contributions are welcome: bug fixes, documentation, and feature ideas; past contributions are credited per release in [`CHANGELOG.md`](CHANGELOG.md).
 
+For local quality checks, install the dev extras and run the same tools enforced in CI:
+
+```bash
+pip install -e ".[dev]"
+ruff check .
+snyk code test .
+```
+
+The repository-level [`.snyk`](.snyk) policy excludes generated output folders such as `results/`, `eval_results/`, `reports/`, and `worklog/` so Snyk Code stays focused on maintained source files.
+
 ## Citation
 
 Please reference our work if you find *TradingAgents* provides you with some help :)
