@@ -64,6 +64,57 @@ jobs:
         # while skipping generated output folders via pyproject extend-exclude.
         run: ruff check .
 
+  secret-scan:
+    name: detect-secrets (no new findings)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install detect-secrets
+        run: pip install "detect-secrets==1.5.0"
+      - name: Ensure baseline exists
+        run: test -f .secrets.baseline
+      - name: Scan and fail on new potential secrets
+        run: |
+          detect-secrets scan --all-files --exclude-files '(^|[\\/])\.venv([\\/]|$)' > .secrets.ci.baseline
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          def load(path: str) -> dict:
+              raw = Path(path).read_text(encoding="utf-8")
+              return json.loads(raw)
+
+          def flatten(data: dict) -> set[tuple[str, str, int | None, str]]:
+              out = set()
+              for filename, findings in data.get("results", {}).items():
+                  for finding in findings:
+                      out.add(
+                          (
+                              filename,
+                              str(finding.get("type", "")),
+                              finding.get("line_number"),
+                              str(finding.get("hashed_secret", "")),
+                          )
+                      )
+              return out
+
+          baseline = flatten(load(".secrets.baseline"))
+          current = flatten(load(".secrets.ci.baseline"))
+          added = sorted(current - baseline)
+
+          if added:
+              print("New potential secrets detected (not in baseline):")
+              for filename, ftype, line_no, hashed in added:
+                  print(f"- {filename}:{line_no} | {ftype} | {hashed}")
+              sys.exit(1)
+
+          print("No new secret findings relative to baseline.")
+          PY
+
   snyk-code:
     name: snyk code
     runs-on: ubuntu-latest
@@ -76,7 +127,9 @@ jobs:
         run: echo "SNYK_TOKEN is not configured; skipping Snyk Code."
       - name: Install Snyk CLI
         if: env.SNYK_TOKEN != ''
-        uses: snyk/actions/setup@master
+        # Pin to a commit (not @master) so CI cannot pick up an unreviewed
+        # upstream change. Update deliberately when bumping Snyk setup.
+        uses: snyk/actions/setup@12140f4059e244892ae643824a95459a102120dd
       - name: Run Snyk Code
         if: env.SNYK_TOKEN != ''
         id: snyk-code

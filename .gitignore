@@ -157,6 +157,9 @@ ENV/
 env.bak/
 venv.bak/
 
+# Local AI / editor assistant notes (not part of the project)
+CLAUDE.md
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -228,3 +231,9 @@ worklog/
 # Local security scan artifacts
 snyk-code.sarif
 snyk-code.json
+.secrets.ci.baseline
+.bandit.*
+
+# Cursor local IDE state
+.cursor/
+
