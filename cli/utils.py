@@ -342,9 +342,11 @@ def _llm_provider_table() -> list[tuple[str, str, str | None]]:
     env-set provider resolves to the same default endpoint the menu uses.
     Ollama users can point at a remote ollama-serve via OLLAMA_BASE_URL
     (convention from the broader Ollama ecosystem); falls back to the
-    localhost default when unset.
+    localhost default when unset. Cursor users can override the Chat
+    Completions endpoint via CURSOR_BASE_URL (default https://api.cursor.com/v1).
     """
     ollama_url = os.environ.get("OLLAMA_BASE_URL") or "http://localhost:11434/v1"
+    cursor_url = os.environ.get("CURSOR_BASE_URL") or "https://api.cursor.com/v1"
     return [
         ("OpenAI", "openai", "https://api.openai.com/v1"),
         ("Google", "google", None),
@@ -359,6 +361,7 @@ def _llm_provider_table() -> list[tuple[str, str, str | None]]:
         ("Kimi (Moonshot)", "kimi", "https://api.moonshot.ai/v1"),
         ("Groq", "groq", "https://api.groq.com/openai/v1"),
         ("NVIDIA NIM", "nvidia", "https://integrate.api.nvidia.com/v1"),
+        ("Cursor", "cursor", cursor_url),
         ("Azure OpenAI", "azure", None),
         ("Amazon Bedrock", "bedrock", None),
         ("Ollama", "ollama", ollama_url),

@@ -39,6 +39,7 @@ def test_registry_membership():
     ("kimi", "https://api.moonshot.ai/v1", NormalizedChatOpenAI, False),
     ("groq", "https://api.groq.com/openai/v1", NormalizedChatOpenAI, False),
     ("nvidia", "https://integrate.api.nvidia.com/v1", NormalizedChatOpenAI, False),
+    ("cursor", "https://api.cursor.com/v1", NormalizedChatOpenAI, False),
     ("ollama", "http://localhost:11434/v1", NormalizedChatOpenAI, False),
 ])
 def test_registry_spec(provider, base_url, chat_class, responses):
@@ -55,5 +56,6 @@ def test_key_optionality():
     assert OPENAI_COMPATIBLE_PROVIDERS["openai_compatible"].key_optional is True
     assert OPENAI_COMPATIBLE_PROVIDERS["openai_compatible"].require_base_url is True
     assert OPENAI_COMPATIBLE_PROVIDERS["xai"].key_optional is False
-    # OLLAMA_BASE_URL is the only base-URL env override.
+    # OLLAMA_BASE_URL / CURSOR_BASE_URL are the base-URL env overrides.
     assert OPENAI_COMPATIBLE_PROVIDERS["ollama"].base_url_env == "OLLAMA_BASE_URL"
+    assert OPENAI_COMPATIBLE_PROVIDERS["cursor"].base_url_env == "CURSOR_BASE_URL"

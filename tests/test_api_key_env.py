@@ -14,17 +14,13 @@ from tradingagents.llm_clients.api_key_env import PROVIDER_API_KEY_ENV, get_api_
 
 def test_every_select_llm_provider_choice_has_an_entry():
     """select_llm_provider() must not present a provider the mapping doesn't know about."""
-    # Mirrors the dropdown order in cli/utils.select_llm_provider so the two
-    # stay in lockstep. Region-specific keys (qwen-cn / minimax-cn / glm-cn)
-    # are reached via the secondary region prompt, so they must also be present.
-    expected = {
-        "openai", "google", "anthropic", "xai", "deepseek",
-        "qwen", "qwen-cn",
-        "glm", "glm-cn",
-        "minimax", "minimax-cn",
-        "openrouter", "azure", "ollama",
-    }
-    assert expected.issubset(PROVIDER_API_KEY_ENV.keys())
+    from cli.utils import _llm_provider_table
+
+    for _, provider_key, _ in _llm_provider_table():
+        assert provider_key in PROVIDER_API_KEY_ENV
+    # Region-specific keys are reached via the secondary region prompt.
+    for key in ("qwen-cn", "minimax-cn", "glm-cn"):
+        assert key in PROVIDER_API_KEY_ENV
 
 
 @pytest.mark.parametrize(
@@ -43,6 +39,7 @@ def test_every_select_llm_provider_choice_has_an_entry():
         ("minimax",    "MINIMAX_API_KEY"),
         ("minimax-cn", "MINIMAX_CN_API_KEY"),
         ("openrouter", "OPENROUTER_API_KEY"),
+        ("cursor",     "CURSOR_API_KEY"),
     ],
 )
 def test_known_providers_resolve(provider, env_var):

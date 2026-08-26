@@ -144,8 +144,11 @@ export ZHIPU_CN_API_KEY=...        # GLM via BigModel (China, open.bigmodel.cn)
 export MINIMAX_API_KEY=...         # MiniMax — Global (api.minimax.io)
 export MINIMAX_CN_API_KEY=...      # MiniMax — China (api.minimaxi.com)
 export OPENROUTER_API_KEY=...      # OpenRouter
+export CURSOR_API_KEY=...          # Cursor (Composer) — https://cursor.com/dashboard/api
 export ALPHA_VANTAGE_API_KEY=...   # Alpha Vantage
 ```
+
+For Cursor, set `llm_provider: "cursor"` and `CURSOR_API_KEY` (from [Cursor Dashboard → API Keys](https://cursor.com/dashboard/api)). The default Chat Completions endpoint is `https://api.cursor.com/v1`; override with `CURSOR_BASE_URL` (or `TRADINGAGENTS_LLM_BACKEND_URL`) if you run a local OpenAI-compatible Cursor proxy. Pick Composer 2.5 in the CLI, or a custom model ID your account can access.
 
 For Azure OpenAI, copy `.env.enterprise.example` to `.env.enterprise` and fill in your credentials.
 
@@ -197,7 +200,7 @@ An interface will appear showing results as they load, letting you track the age
 
 ### Implementation Details
 
-We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, DeepSeek, Qwen (Alibaba DashScope, international and China endpoints), GLM (Zhipu), MiniMax (global + China), OpenRouter, Ollama for local models, and Azure OpenAI for enterprise.
+We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, DeepSeek, Qwen (Alibaba DashScope, international and China endpoints), GLM (Zhipu), MiniMax (global + China), OpenRouter, Cursor, Ollama for local models, and Azure OpenAI for enterprise.
 
 ### Python Usage
 
@@ -221,7 +224,7 @@ from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
 config = DEFAULT_CONFIG.copy()
-config["llm_provider"] = "openai"        # e.g. openai, google, anthropic, deepseek, groq, ollama; openai_compatible covers any OpenAI-compatible endpoint (vLLM, LM Studio, llama.cpp, ...)
+config["llm_provider"] = "openai"        # e.g. openai, google, anthropic, deepseek, groq, cursor, ollama; openai_compatible covers any OpenAI-compatible endpoint (vLLM, LM Studio, llama.cpp, ...)
 config["deep_think_llm"] = "gpt-5.5"     # Model for complex reasoning
 config["quick_think_llm"] = "gpt-5.4-mini" # Model for quick tasks
 config["max_debate_rounds"] = 2

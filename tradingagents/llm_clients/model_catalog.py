@@ -186,6 +186,20 @@ MODEL_OPTIONS: ProviderModeOptions = {
     "kimi": _CUSTOM_ONLY,
     "groq": _CUSTOM_ONLY,
     "nvidia": _CUSTOM_ONLY,
+    # Cursor Cloud / Composer IDs. Catalog is a shortlist; any ID the account
+    # can access is still valid (see validators._ANY_MODEL_PROVIDERS).
+    "cursor": {
+        "quick": [
+            ("Composer 2.5 - Cursor default, fast agentic", "composer-2.5"),
+            ("Composer 2 - Previous Composer", "composer-2"),
+            ("Custom model ID", "custom"),
+        ],
+        "deep": [
+            ("Composer 2.5 - Cursor default", "composer-2.5"),
+            ("Auto (Cursor Router)", "auto"),
+            ("Custom model ID", "custom"),
+        ],
+    },
     # Bedrock model IDs / cross-region inference profile IDs are user-specified.
     "bedrock": _CUSTOM_ONLY,
 }
